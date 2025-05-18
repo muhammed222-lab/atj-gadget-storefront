@@ -1,0 +1,123 @@
+
+import { jsPDF } from 'jspdf';
+import { Order, OrderItem } from '@/services/DataService';
+
+export const generateOrderPdf = (order: Order): Blob => {
+  const doc = new jsPDF();
+  
+  // Add logo (placeholder)
+  doc.setFontSize(22);
+  doc.setTextColor(27, 57, 47); // ATJ dark green
+  doc.text("ALLTHINGSJESS", 105, 20, { align: "center" });
+  
+  // Add Order Receipt title
+  doc.setFontSize(18);
+  doc.text("ORDER RECEIPT", 105, 30, { align: "center" });
+  
+  // Add watermark
+  doc.setFontSize(30);
+  doc.setTextColor(220, 220, 220);
+  doc.save();
+  doc.rotate(45, 105, 160);
+  doc.text("Original - ALLTHINGSJESS", 105, 160, { align: "center" });
+  doc.restore();
+  
+  // Reset text color
+  doc.setTextColor(0, 0, 0);
+  
+  // Order details
+  doc.setFontSize(12);
+  doc.text(`Order #: ${order.id}`, 15, 45);
+  doc.text(`Date: ${new Date(order.date).toLocaleDateString()}`, 15, 52);
+  doc.text(`Status: ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}`, 15, 59);
+  
+  if (order.trackingId) {
+    doc.text(`Tracking ID: ${order.trackingId}`, 15, 66);
+  }
+  
+  // Customer details
+  doc.setFontSize(14);
+  doc.text("Customer Information", 15, 80);
+  
+  doc.setFontSize(12);
+  doc.text(`Name: ${order.customer.name}`, 15, 88);
+  doc.text(`Email: ${order.customer.email}`, 15, 95);
+  doc.text(`Address: ${order.customer.address}`, 15, 102);
+  doc.text(`Country: ${order.customer.country}`, 15, 109);
+  
+  // Order items
+  doc.setFontSize(14);
+  doc.text("Order Items", 15, 125);
+  
+  // Table header
+  doc.setFontSize(10);
+  doc.text("Product", 15, 133);
+  doc.text("Quantity", 120, 133);
+  doc.text("Price", 145, 133);
+  doc.text("Total", 170, 133);
+  
+  // Draw line
+  doc.line(15, 135, 195, 135);
+  
+  // Items
+  let y = 142;
+  order.items.forEach((item) => {
+    // If y position is too low, add a new page
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+      
+      // Add header to new page
+      doc.setFontSize(10);
+      doc.text("Product", 15, y);
+      doc.text("Quantity", 120, y);
+      doc.text("Price", 145, y);
+      doc.text("Total", 170, y);
+      
+      // Draw line
+      y += 2;
+      doc.line(15, y, 195, y);
+      y += 7;
+    }
+    
+    doc.setFontSize(10);
+    
+    // Product name (with wrapping if necessary)
+    const splitTitle = doc.splitTextToSize(item.productName, 100);
+    doc.text(splitTitle, 15, y);
+    
+    // Quantity, price and total
+    doc.text(item.quantity.toString(), 120, y);
+    doc.text(`$${item.price.toFixed(2)}`, 145, y);
+    doc.text(`$${(item.quantity * item.price).toFixed(2)}`, 170, y);
+    
+    // Adjust y position based on how many lines the title took
+    y += Math.max(splitTitle.length * 5, 7);
+  });
+  
+  // Draw line
+  doc.line(15, y, 195, y);
+  y += 10;
+  
+  // Total
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text(`Total Amount: $${order.totalAmount.toFixed(2)}`, 140, y);
+  doc.setFont(undefined, 'normal');
+  
+  // Footer
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text("Thank you for shopping with ALLTHINGSJESS!", 105, 285, { align: "center" });
+  doc.text("For customer support, please contact support@allthingsjess.com", 105, 290, { align: "center" });
+  
+  return doc.output('blob');
+};
+
+export const downloadOrderPdf = (order: Order) => {
+  const blob = generateOrderPdf(order);
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `ATJ_Order_${order.id}.pdf`;
+  link.click();
+};
