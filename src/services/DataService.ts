@@ -39,12 +39,14 @@ export interface OrderItem {
   productName: string;
   quantity: number;
   price: number;
+  color?: string; // Added color property
 }
 
 export interface Review {
   id: string;
   productId: string;
   userId: string;
+  userName?: string; // Add userName property
   rating: number;
   comment: string;
   date: Date;
@@ -59,6 +61,7 @@ export interface User {
   isAdmin: boolean;
 }
 
+// Generate mock data functions
 const generateRandomProduct = (): Product => {
   const productName = faker.commerce.productName();
   const category = faker.commerce.department();
@@ -95,6 +98,7 @@ const generateRandomOrder = (): Order => {
       productName: faker.commerce.productName(),
       quantity: quantity,
       price: price,
+      color: faker.datatype.boolean() ? faker.color.human() : undefined
     };
   });
   
@@ -120,6 +124,7 @@ const generateRandomReview = (productId: string, userId: string): Review => ({
   id: faker.string.uuid(),
   productId: productId,
   userId: userId,
+  userName: faker.person.fullName(),
   rating: faker.number.int({ min: 1, max: 5 }),
   comment: faker.lorem.sentence(),
   date: faker.date.recent(),
@@ -151,8 +156,13 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
 };
 
 export const getProductsByCategory = async (categoryName: string): Promise<Product[]> => {
-   await new Promise(resolve => setTimeout(resolve, 500));
-   return mockProducts.filter(product => product.category.toLowerCase() === categoryName.toLowerCase());
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return mockProducts.filter(product => product.category.toLowerCase() === categoryName.toLowerCase());
+};
+
+export const getFeaturedProducts = async (): Promise<Product[]> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return mockProducts.slice(0, 6);
 };
 
 export const createProduct = async (product: Omit<Product, 'id'>): Promise<Product> => {
@@ -182,9 +192,59 @@ export const deleteProduct = async (id: string): Promise<boolean> => {
   return false;
 };
 
-export const getReviewsByProductId = async (productId: string): Promise<Review[]> => {
+export const filterProducts = async (
+  category?: string,
+  brands?: string[],
+  priceRange?: [number, number],
+  ratings?: number[]
+): Promise<Product[]> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  return mockProducts.filter(product => {
+    // Category filter
+    if (category && product.category.toLowerCase() !== category.toLowerCase()) {
+      return false;
+    }
+    
+    // Brand filter
+    if (brands && brands.length > 0 && !brands.includes(product.brand)) {
+      return false;
+    }
+    
+    // Price range filter
+    if (priceRange) {
+      const [min, max] = priceRange;
+      if (product.price < min || product.price > max) {
+        return false;
+      }
+    }
+    
+    // Rating filter
+    if (ratings && ratings.length > 0) {
+      const ratingMatch = ratings.some(r => {
+        const floor = Math.floor(product.rating);
+        return floor === r;
+      });
+      if (!ratingMatch) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
+};
+
+export const getProductReviews = async (productId: string): Promise<Review[]> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   return Array.from({ length: faker.number.int({ min: 0, max: 10 }) }, () => generateRandomReview(productId, faker.string.uuid()));
+};
+
+export const addProductReview = async (review: Omit<Review, 'id'>): Promise<Review> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return {
+    id: faker.string.uuid(),
+    ...review
+  };
 };
 
 export const getAllOrders = async (): Promise<Order[]> => {
@@ -197,12 +257,46 @@ export const getOrderById = async (id: string): Promise<Order | undefined> => {
   return mockOrders.find(order => order.id === id);
 };
 
+export const updateOrderStatus = async (id: string, status: Order['status']): Promise<Order | undefined> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  const orderIndex = mockOrders.findIndex(order => order.id === id);
+  if (orderIndex !== -1) {
+    mockOrders[orderIndex].status = status;
+    return mockOrders[orderIndex];
+  }
+  return undefined;
+};
+
+export const placeOrder = async (orderData: Partial<Order>): Promise<Order> => {
+  await new Promise(resolve => setTimeout(resolve, 500));
+  const newOrder: Order = {
+    id: faker.string.uuid(),
+    date: orderData.date ? new Date(orderData.date) : new Date(),
+    status: 'pending',
+    customer: orderData.customer || {
+      name: '',
+      email: '',
+      address: '',
+      country: ''
+    },
+    items: orderData.items || [],
+    totalAmount: orderData.totalAmount || 0,
+    trackingId: faker.string.alphanumeric(10)
+  };
+  mockOrders.unshift(newOrder);
+  return newOrder;
+};
+
 export const getAllUsers = async (): Promise<User[]> => {
-   await new Promise(resolve => setTimeout(resolve, 500));
-   return mockUsers;
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return mockUsers;
 };
 
 export const getUserById = async (id: string): Promise<User | undefined> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   return mockUsers.find(user => user.id === id);
+};
+
+export const addProduct = async (product: Omit<Product, 'id'>): Promise<Product> => {
+  return createProduct(product);
 };

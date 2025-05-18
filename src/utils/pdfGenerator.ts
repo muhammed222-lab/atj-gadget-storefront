@@ -19,15 +19,15 @@ export const generateOrderPdf = (order: Order): Blob => {
   doc.setTextColor(220, 220, 220);
   // Using the correct jsPDF methods for rotation
   const angle = 45;
-  const x = 105;
-  const y = 160;
+  const watermarkX = 105;
+  const watermarkY = 160;
   
   // Save the current state
   const state = doc.saveGraphicsState();
   
   // Apply transformations
   doc.setTextColor(220, 220, 220);
-  doc.text("Original - ALLTHINGSJESS", x, y, { 
+  doc.text("Original - ALLTHINGSJESS", watermarkX, watermarkY, { 
     align: "center",
     angle: angle,
     renderingMode: "fillThenStroke"
@@ -74,49 +74,49 @@ export const generateOrderPdf = (order: Order): Blob => {
   doc.line(15, 135, 195, 135);
   
   // Items
-  let y = 142;
+  let yPosition = 142;
   order.items.forEach((item) => {
     // If y position is too low, add a new page
-    if (y > 270) {
+    if (yPosition > 270) {
       doc.addPage();
-      y = 20;
+      yPosition = 20;
       
       // Add header to new page
       doc.setFontSize(10);
-      doc.text("Product", 15, y);
-      doc.text("Quantity", 120, y);
-      doc.text("Price", 145, y);
-      doc.text("Total", 170, y);
+      doc.text("Product", 15, yPosition);
+      doc.text("Quantity", 120, yPosition);
+      doc.text("Price", 145, yPosition);
+      doc.text("Total", 170, yPosition);
       
       // Draw line
-      y += 2;
-      doc.line(15, y, 195, y);
-      y += 7;
+      yPosition += 2;
+      doc.line(15, yPosition, 195, yPosition);
+      yPosition += 7;
     }
     
     doc.setFontSize(10);
     
     // Product name (with wrapping if necessary)
     const splitTitle = doc.splitTextToSize(item.productName, 100);
-    doc.text(splitTitle, 15, y);
+    doc.text(splitTitle, 15, yPosition);
     
     // Quantity, price and total
-    doc.text(item.quantity.toString(), 120, y);
-    doc.text(`$${item.price.toFixed(2)}`, 145, y);
-    doc.text(`$${(item.quantity * item.price).toFixed(2)}`, 170, y);
+    doc.text(item.quantity.toString(), 120, yPosition);
+    doc.text(`$${item.price.toFixed(2)}`, 145, yPosition);
+    doc.text(`$${(item.quantity * item.price).toFixed(2)}`, 170, yPosition);
     
     // Adjust y position based on how many lines the title took
-    y += Math.max(splitTitle.length * 5, 7);
+    yPosition += Math.max(splitTitle.length * 5, 7);
   });
   
   // Draw line
-  doc.line(15, y, 195, y);
-  y += 10;
+  doc.line(15, yPosition, 195, yPosition);
+  yPosition += 10;
   
   // Total
   doc.setFontSize(12);
   doc.setFont(undefined, 'bold');
-  doc.text(`Total Amount: $${order.totalAmount.toFixed(2)}`, 140, y);
+  doc.text(`Total Amount: $${order.totalAmount.toFixed(2)}`, 140, yPosition);
   doc.setFont(undefined, 'normal');
   
   // Footer
