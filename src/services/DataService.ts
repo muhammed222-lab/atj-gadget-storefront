@@ -1,5 +1,4 @@
-
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 // Define types
 export interface Product {
@@ -22,7 +21,7 @@ export interface Product {
 export interface Order {
   id: string;
   date: Date;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
   customer: {
     name: string;
     email: string;
@@ -73,15 +72,11 @@ const generateRandomProduct = (): Product => {
   const category = faker.commerce.department();
   const price = parseFloat(faker.commerce.price());
   const hasDiscount = faker.datatype.boolean();
-  const originalPrice = hasDiscount ? price * (1 + faker.number.float({
-    min: 0.1,
-    max: 0.5
-  })) : undefined;
-  const imageCount = faker.number.int({
-    min: 1,
-    max: 4
-  });
-  
+  const originalPrice = hasDiscount
+    ? price * (1 + faker.number.float({ min: 0.1, max: 0.5 }))
+    : undefined;
+  const imageCount = faker.number.int({ min: 1, max: 4 });
+
   return {
     id: faker.string.uuid(),
     name: productName,
@@ -91,84 +86,67 @@ const generateRandomProduct = (): Product => {
     brand: faker.company.name(),
     category: category,
     inStock: faker.datatype.boolean(),
-    rating: faker.number.float({
-      min: 1,
-      max: 5,
-      precision: 0.1
-    }),
-    reviewCount: faker.number.int({
-      min: 0,
-      max: 500
-    }),
-    images: Array.from({
-      length: imageCount
-    }, () => faker.image.url()),
-    colors: faker.datatype.boolean() ? Array.from({
-      length: faker.number.int({
-        min: 1,
-        max: 3
-      })
-    }, () => faker.color.human()) : undefined,
-    features: faker.datatype.boolean() ? Array.from({
-      length: faker.number.int({
-        min: 2,
-        max: 5
-      })
-    }, () => faker.lorem.sentence()) : undefined,
-    specifications: faker.datatype.boolean() ? Object.fromEntries(Array.from({
-      length: faker.number.int({
-        min: 1,
-        max: 4
-      })
-    }, () => [
-      faker.commerce.productAdjective(),
-      faker.lorem.words()
-    ])) : undefined
+    rating: faker.number.float({ min: 1, max: 5, precision: 0.1 }),
+    reviewCount: faker.number.int({ min: 0, max: 500 }),
+    images: Array.from({ length: imageCount }, () => faker.image.url()),
+    colors: faker.datatype.boolean()
+      ? Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, () =>
+          faker.color.human()
+        )
+      : undefined,
+    features: faker.datatype.boolean()
+      ? Array.from({ length: faker.number.int({ min: 2, max: 5 }) }, () =>
+          faker.lorem.sentence()
+        )
+      : undefined,
+    specifications: faker.datatype.boolean()
+      ? Object.fromEntries(
+          Array.from({ length: faker.number.int({ min: 1, max: 4 }) }, () => [
+            faker.commerce.productAdjective(),
+            faker.lorem.words(),
+          ])
+        )
+      : undefined,
   };
 };
 
 const generateRandomOrder = (): Order => {
-  const itemCount = faker.number.int({
-    min: 1,
-    max: 5
-  });
-  const items = Array.from({
-    length: itemCount
-  }, () => {
+  const itemCount = faker.number.int({ min: 1, max: 5 });
+  const items = Array.from({ length: itemCount }, () => {
     const price = parseFloat(faker.commerce.price());
-    const quantity = faker.number.int({
-      min: 1,
-      max: 5
-    });
+    const quantity = faker.number.int({ min: 1, max: 5 });
     return {
       productId: faker.string.uuid(),
       productName: faker.commerce.productName(),
       quantity: quantity,
       price: price,
-      color: faker.datatype.boolean() ? faker.color.human() : undefined
+      color: faker.datatype.boolean() ? faker.color.human() : undefined,
     };
   });
-  const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  
+  const totalAmount = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
   return {
     id: faker.string.uuid(),
     date: faker.date.recent(),
     status: faker.helpers.arrayElement([
-      'pending',
-      'processing',
-      'shipped',
-      'delivered',
-      'cancelled'
-    ]) as Order['status'],
+      "pending",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ]) as Order["status"],
     customer: {
       name: faker.person.fullName(),
       email: faker.internet.email(),
       address: faker.location.streetAddress(),
-      country: faker.location.country()
+      country: faker.location.country(),
     },
     items: items,
     totalAmount: totalAmount,
-    trackingId: faker.string.alphanumeric(10)
+    trackingId: faker.string.alphanumeric(10),
   };
 };
 
@@ -177,12 +155,9 @@ const generateRandomReview = (productId: string, userId: string): Review => ({
   productId: productId,
   userId: userId,
   userName: faker.person.fullName(),
-  rating: faker.number.int({
-    min: 1,
-    max: 5
-  }),
+  rating: faker.number.int({ min: 1, max: 5 }),
   comment: faker.lorem.sentence(),
-  date: faker.date.recent()
+  date: faker.date.recent(),
 });
 
 const generateRandomUser = (): User => ({
@@ -191,21 +166,13 @@ const generateRandomUser = (): User => ({
   email: faker.internet.email(),
   address: faker.location.streetAddress(),
   phone: faker.phone.number(),
-  isAdmin: faker.datatype.boolean()
+  isAdmin: faker.datatype.boolean(),
 });
 
 // Generate mock data
-const mockProducts = Array.from({
-  length: 24
-}, () => generateRandomProduct());
-
-const mockOrders = Array.from({
-  length: 10
-}, () => generateRandomOrder());
-
-const mockUsers = Array.from({
-  length: 5
-}, () => generateRandomUser());
+const mockProducts = Array.from({ length: 24 }, () => generateRandomProduct());
+const mockOrders = Array.from({ length: 10 }, () => generateRandomOrder());
+const mockUsers = Array.from({ length: 5 }, () => generateRandomUser());
 
 // API functions (mocked)
 export const getAllProducts = async (): Promise<Product[]> => {
@@ -213,69 +180,82 @@ export const getAllProducts = async (): Promise<Product[]> => {
   return mockProducts;
 };
 
-export const getProductById = async (id: string): Promise<Product | undefined> => {
+export const getProductById = async (
+  id: string
+): Promise<Product | undefined> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   return mockProducts.find((product) => product.id === id);
 };
 
-export const getProductsByCategory = async (categoryName: string): Promise<Product[]> => {
+export const getProductsByCategory = async (
+  categoryName: string
+): Promise<Product[]> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  return mockProducts.filter((product) => product.category.toLowerCase() === categoryName.toLowerCase());
+  return mockProducts.filter(
+    (product) => product.category.toLowerCase() === categoryName.toLowerCase()
+  );
 };
 
-export const filterProducts = async (filters: FilterOptions): Promise<Product[]> => {
+export const filterProducts = async (
+  filters: FilterOptions
+): Promise<Product[]> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  
-  return mockProducts.filter(product => {
+
+  return mockProducts.filter((product) => {
     // Category filter
-    if (filters.category && product.category.toLowerCase() !== filters.category.toLowerCase()) {
+    if (
+      filters.category &&
+      product.category.toLowerCase() !== filters.category.toLowerCase()
+    ) {
       return false;
     }
-    
+
     // Brand filter
-    if (filters.brand && product.brand.toLowerCase() !== filters.brand.toLowerCase()) {
+    if (
+      filters.brand &&
+      product.brand.toLowerCase() !== filters.brand.toLowerCase()
+    ) {
       return false;
     }
-    
+
     // Color filter
     if (filters.colors.length > 0 && product.colors) {
-      if (!product.colors.some(color => filters.colors.includes(color))) {
+      if (!product.colors.some((color) => filters.colors.includes(color))) {
         return false;
       }
     }
-    
+
     // Price filters
     if (product.price < filters.minPrice || product.price > filters.maxPrice) {
       return false;
     }
-    
+
     // Rating filter
     if (product.rating < filters.minRating) {
       return false;
     }
-    
+
     return true;
   });
 };
 
-export const createProduct = async (product: Omit<Product, "id">): Promise<Product> => {
+export const createProduct = async (
+  product: Omit<Product, "id">
+): Promise<Product> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const newProduct = {
-    id: faker.string.uuid(),
-    ...product
-  };
+  const newProduct = { id: faker.string.uuid(), ...product };
   mockProducts.push(newProduct);
   return newProduct;
 };
 
-export const updateProduct = async (id: string, updates: Partial<Product>): Promise<Product | undefined> => {
+export const updateProduct = async (
+  id: string,
+  updates: Partial<Product>
+): Promise<Product | undefined> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   const productIndex = mockProducts.findIndex((product) => product.id === id);
   if (productIndex !== -1) {
-    mockProducts[productIndex] = {
-      ...mockProducts[productIndex],
-      ...updates
-    };
+    mockProducts[productIndex] = { ...mockProducts[productIndex], ...updates };
     return mockProducts[productIndex];
   }
   return undefined;
@@ -291,22 +271,20 @@ export const deleteProduct = async (id: string): Promise<boolean> => {
   return false;
 };
 
-export const getProductReviews = async (productId: string): Promise<Review[]> => {
+export const getProductReviews = async (
+  productId: string
+): Promise<Review[]> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  return Array.from({
-    length: faker.number.int({
-      min: 0,
-      max: 10
-    })
-  }, () => generateRandomReview(productId, faker.string.uuid()));
+  return Array.from({ length: faker.number.int({ min: 0, max: 10 }) }, () =>
+    generateRandomReview(productId, faker.string.uuid())
+  );
 };
 
-export const createReview = async (review: Omit<Review, "id">): Promise<Review> => {
+export const createReview = async (
+  review: Omit<Review, "id">
+): Promise<Review> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const newReview = {
-    id: faker.string.uuid(),
-    ...review
-  };
+  const newReview = { id: faker.string.uuid(), ...review };
   return newReview;
 };
 
@@ -320,34 +298,36 @@ export const getOrderById = async (id: string): Promise<Order | undefined> => {
   return mockOrders.find((order) => order.id === id);
 };
 
-export const createOrder = async (orderData: Partial<Order>): Promise<Order> => {
+export const createOrder = async (
+  orderData: Partial<Order>
+): Promise<Order> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  
+
   // Convert string date to Date object if needed
   let orderDate: Date;
-  if (orderData.date && typeof orderData.date === 'string') {
+  if (orderData.date && typeof orderData.date === "string") {
     orderDate = new Date(orderData.date);
   } else if (orderData.date instanceof Date) {
     orderDate = orderData.date;
   } else {
     orderDate = new Date();
   }
-  
+
   const newOrder: Order = {
     id: faker.string.uuid(),
     date: orderDate,
-    status: orderData.status || 'pending',
+    status: orderData.status || "pending",
     customer: orderData.customer || {
-      name: '',
-      email: '',
-      address: '',
-      country: ''
+      name: "",
+      email: "",
+      address: "",
+      country: "",
     },
     items: orderData.items || [],
     totalAmount: orderData.totalAmount || 0,
-    trackingId: orderData.trackingId
+    trackingId: orderData.trackingId,
   };
-  
+
   mockOrders.push(newOrder);
   return newOrder;
 };
@@ -360,4 +340,52 @@ export const getAllUsers = async (): Promise<User[]> => {
 export const getUserById = async (id: string): Promise<User | undefined> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   return mockUsers.find((user) => user.id === id);
+};
+
+// Additional exports to satisfy dependency errors
+
+export const updateOrderStatus = async (
+  orderId: string,
+  newStatus: Order["status"]
+): Promise<Order | undefined> => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const order = mockOrders.find((o) => o.id === orderId);
+  if (order) {
+    order.status = newStatus;
+    return order;
+  }
+  return undefined;
+};
+
+export const addProduct = async (
+  product: Omit<Product, "id">
+): Promise<Product> => {
+  // Alias for createProduct
+  return createProduct(product);
+};
+
+export const placeOrder = async (orderData: Partial<Order>): Promise<Order> => {
+  // Alias for createOrder
+  return createOrder(orderData);
+};
+
+export const getFeaturedProducts = async (): Promise<Product[]> => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  // Return top 5 products sorted by rating (highest first)
+  return mockProducts.sort((a, b) => b.rating - a.rating).slice(0, 5);
+};
+
+export const addProductReview = async (
+  productId: string,
+  review: Omit<Review, "id" | "date">
+): Promise<Review> => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  const newReview: Review = {
+    id: faker.string.uuid(),
+    productId,
+    ...review,
+    date: new Date(),
+  };
+  // Optionally, update product reviewCount here if needed.
+  return newReview;
 };
