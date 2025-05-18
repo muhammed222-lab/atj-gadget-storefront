@@ -196,7 +196,7 @@ export const deleteProduct = async (id: string): Promise<boolean> => {
 };
 
 export const filterProducts = async (
-  category?: string,
+  category?: string | null,
   brands?: string[],
   priceRange?: [number, number],
   ratings?: number[]
