@@ -14,13 +14,27 @@ export const generateOrderPdf = (order: Order): Blob => {
   doc.setFontSize(18);
   doc.text("ORDER RECEIPT", 105, 30, { align: "center" });
   
-  // Add watermark
+  // Add watermark - fixing rotation issue
   doc.setFontSize(30);
   doc.setTextColor(220, 220, 220);
-  doc.save();
-  doc.rotate(45, 105, 160);
-  doc.text("Original - ALLTHINGSJESS", 105, 160, { align: "center" });
-  doc.restore();
+  // Using the correct jsPDF methods for rotation
+  const angle = 45;
+  const x = 105;
+  const y = 160;
+  
+  // Save the current state
+  const state = doc.saveGraphicsState();
+  
+  // Apply transformations
+  doc.setTextColor(220, 220, 220);
+  doc.text("Original - ALLTHINGSJESS", x, y, { 
+    align: "center",
+    angle: angle,
+    renderingMode: "fillThenStroke"
+  });
+  
+  // Restore the state
+  doc.restoreGraphicsState();
   
   // Reset text color
   doc.setTextColor(0, 0, 0);
