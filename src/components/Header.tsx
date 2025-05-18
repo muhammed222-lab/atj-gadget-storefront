@@ -1,14 +1,21 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Search, ShoppingCart, User, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { cart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  
+  const handleUserIconClick = () => {
+    navigate('/account');
+  };
   
   const categories = [
     { name: "Headsets", path: "/category/headsets" },
@@ -55,9 +62,12 @@ const Header = () => {
               <Search size={20} />
             </button>
             
-            <Link to="/account" className="p-2 text-gray-700 hover:text-atj hidden md:block">
+            <button
+              onClick={handleUserIconClick}
+              className="p-2 text-gray-700 hover:text-atj hidden md:block"
+            >
               <User size={20} />
-            </Link>
+            </button>
             
             <Link 
               to="/cart" 

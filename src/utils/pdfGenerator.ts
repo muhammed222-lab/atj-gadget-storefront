@@ -1,22 +1,20 @@
 
-import { jsPDF } from 'jspdf';
-import { Order, OrderItem } from '@/services/DataService';
+import { jsPDF } from "jspdf";
+import { Order } from "../services/DataService";
 
-export const generateOrderPdf = (order: Order): Blob => {
+export const generateOrderPDF = (order: Order): string => {
+  // Create a new PDF document
   const doc = new jsPDF();
   
-  // Add logo (placeholder)
+  // Add logo or header
   doc.setFontSize(22);
-  doc.setTextColor(27, 57, 47); // ATJ dark green
+  doc.setFont("helvetica", "bold");
   doc.text("ALLTHINGSJESS", 105, 20, { align: "center" });
   
-  // Add Order Receipt title
-  doc.setFontSize(18);
-  doc.text("ORDER RECEIPT", 105, 30, { align: "center" });
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "normal");
+  doc.text("Order Confirmation", 105, 30, { align: "center" });
   
-  // Add watermark - fixing rotation issue
-  doc.setFontSize(30);
-  doc.setTextColor(220, 220, 220);
   // Using the correct jsPDF methods for rotation
   const angle = 45;
   const watermarkX = 105;
@@ -74,7 +72,7 @@ export const generateOrderPdf = (order: Order): Blob => {
   doc.line(15, 135, 195, 135);
   
   // Items
-  let yPosition = 142; // Renamed 'y' to 'yPosition' to avoid conflict with the watermark variable
+  let yPosition = 142;
   order.items.forEach((item) => {
     // If y position is too low, add a new page
     if (yPosition > 270) {
@@ -115,23 +113,17 @@ export const generateOrderPdf = (order: Order): Blob => {
   
   // Total
   doc.setFontSize(12);
-  doc.setFont(undefined, 'bold');
-  doc.text(`Total Amount: $${order.totalAmount.toFixed(2)}`, 140, yPosition);
-  doc.setFont(undefined, 'normal');
+  doc.setFont("helvetica", "bold");
+  doc.text("Total:", 145, yPosition);
+  doc.text(`$${order.totalAmount.toFixed(2)}`, 170, yPosition);
   
   // Footer
   doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text("Thank you for shopping with ALLTHINGSJESS!", 105, 285, { align: "center" });
-  doc.text("For customer support, please contact support@allthingsjess.com", 105, 290, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  yPosition += 20;
+  doc.text("Thank you for your order!", 105, yPosition, { align: "center" });
   
-  return doc.output('blob');
-};
-
-export const downloadOrderPdf = (order: Order) => {
-  const blob = generateOrderPdf(order);
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `ATJ_Order_${order.id}.pdf`;
-  link.click();
+  // Get PDF as data URL
+  const pdfOutput = doc.output("datauristring");
+  return pdfOutput;
 };
