@@ -74,7 +74,7 @@ export const generateOrderPdf = (order: Order): Blob => {
   doc.line(15, 135, 195, 135);
   
   // Items
-  let yPosition = 142;
+  let yPosition = 142; // Renamed 'y' to 'yPosition' to avoid conflict with the watermark variable
   order.items.forEach((item) => {
     // If y position is too low, add a new page
     if (yPosition > 270) {

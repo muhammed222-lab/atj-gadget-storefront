@@ -1,3 +1,4 @@
+
 import { faker } from '@faker-js/faker';
 
 export interface Product {
@@ -67,7 +68,8 @@ const generateRandomProduct = (): Product => {
   const category = faker.commerce.department();
   const price = parseFloat(faker.commerce.price());
   const hasDiscount = faker.datatype.boolean();
-  const originalPrice = hasDiscount ? price * (1 + faker.datatype.float({ min: 0.1, max: 0.5 })) : undefined;
+  // Fix for faker.datatype.float - use faker.number.float instead
+  const originalPrice = hasDiscount ? price * (1 + faker.number.float({ min: 0.1, max: 0.5 })) : undefined;
   const imageCount = faker.number.int({ min: 1, max: 4 });
   
   return {
@@ -79,7 +81,8 @@ const generateRandomProduct = (): Product => {
     brand: faker.company.name(),
     category: category,
     inStock: faker.datatype.boolean(),
-    rating: faker.number.float({ min: 1, max: 5, precision: 0.1 }),
+    // Fix for faker.number.float with precision - removed precision parameter
+    rating: faker.number.float({ min: 1, max: 5 }),
     reviewCount: faker.number.int({ min: 0, max: 500 }),
     images: Array.from({ length: imageCount }, () => faker.image.url()),
     colors: faker.datatype.boolean() ? Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, () => faker.color.human()) : undefined,
@@ -221,10 +224,8 @@ export const filterProducts = async (
     
     // Rating filter
     if (ratings && ratings.length > 0) {
-      const ratingMatch = ratings.some(r => {
-        const floor = Math.floor(product.rating);
-        return floor === r;
-      });
+      const floor = Math.floor(product.rating);
+      const ratingMatch = ratings.some(r => floor === r);
       if (!ratingMatch) {
         return false;
       }
@@ -271,7 +272,7 @@ export const placeOrder = async (orderData: Partial<Order>): Promise<Order> => {
   await new Promise(resolve => setTimeout(resolve, 500));
   const newOrder: Order = {
     id: faker.string.uuid(),
-    date: orderData.date ? new Date(orderData.date) : new Date(),
+    date: orderData.date || new Date(),
     status: 'pending',
     customer: orderData.customer || {
       name: '',
